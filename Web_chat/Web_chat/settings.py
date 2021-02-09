@@ -76,7 +76,11 @@ WSGI_APPLICATION = 'Web_chat.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME' : 'web-chat',#name of the database
+	'USER' : 'root',#username for the database
+	'PASSWORD' : '@ars4101',#password 
+	'HOST' : 'localhost',#IP address of the database
+	'PORT' : '3306',#port number of database server
     }
 }
 
