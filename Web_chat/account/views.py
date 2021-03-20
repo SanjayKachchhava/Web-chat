@@ -8,7 +8,7 @@ import os
 import cv2
 import json
 import base64
-# import request
+
 from django.core import files
 
 from friend.models import FriendList,FriendRequest
@@ -96,7 +96,7 @@ def account_view(request,*args,**kwargs):
 	user_id = kwargs.get("user_id")
 	try:
 		account = Account.objects.get(pk = user_id)
-	except account.DoesNotExist:
+	except Account.DoesNotExist:
 		return HttpResponse("That user doesn't exist.")
 	if account:
 		context['id'] = account.id
@@ -119,10 +119,10 @@ def account_view(request,*args,**kwargs):
 		is_self = True
 		is_friend = False
 		request_sent = FriendRequestStatus.NO_REQUEST_SENT.value
-		user = request.user
 		friend_requests = None
-
-		if user.is_authenticated and user != account:
+		
+		user = request.user
+		if user.is_authenticated and user != account:	# user is authenticated and viewing other's account
 			is_self = False
 			if friends.filter(pk=user.id):
 				is_friend = True
@@ -144,7 +144,7 @@ def account_view(request,*args,**kwargs):
 
 		elif not user.is_authenticated:
 			is_self = False
-		else:
+		else:								# user viewing own account
 			try:
 				friend_requests = FriendRequest.objects.filter(receiver=user,is_active=True)
 			except:

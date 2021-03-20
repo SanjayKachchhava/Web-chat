@@ -23,7 +23,7 @@ from django.contrib.auth import views as auth_views
 
 from personal.views import (
 	home_screen_view
-	)
+)
 from account.views import (
     register_view,
     login_view,
@@ -36,6 +36,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/',include('account.urls',namespace='account')),
     path('friend/',include('friend.urls',namespace='friend')),
+    path('chat/',include('chat.urls',namespace='chat')),
     path('login/',login_view,name="login"),
     path('search/',account_search_view,name="search"),
     path('logout/',logout_view,name="logout"),

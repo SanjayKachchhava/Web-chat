@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'personal',
     'account',
     'friend',
+    'chat',
     #third party app
 
     'django.contrib.admin',
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -82,7 +84,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'web_chat.wsgi.application'
-
+ASGI_APPLICATION = 'web_chat.asgi.application'
 
 CHANNEL_LAYERS = {
     'default': {

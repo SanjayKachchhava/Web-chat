@@ -171,12 +171,14 @@
 			{% endif %}
 
 			{% if is_friend %}
-				<div class="d-flex flex-row align-items-center btn btn-primary m-2 px-4" onclick="createOrReturnPrivateChat('{{id}}')">
+			<a href="{% url 'chat:private_chat' receiver_id=id %}">
+				<div class="d-flex flex-row align-items-center btn btn-light m-2 px-4" >
 					<span class="material-icons m-auto">
 					message
 					</span>
 					<span class="message-btn-text m-auto pl-2">Message</span>
 				</div>
+			</a>
 			{% endif %}
 
 		</div>
@@ -185,6 +187,11 @@
 		
 	</div>
 </div>
+<style type="text/css">
+	.material-icons {
+		    color: blue;
+		}
+</style>
 
 
 <script type="text/javascript">

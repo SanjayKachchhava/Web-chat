@@ -59,7 +59,7 @@
 					<h4 class="card-title">{{friend.0.username|truncatechars:50}}</h4>
 				</a>
 				{% if friend.1 %}
-				<a href="#" onclick="createOrReturnPrivateChat('{{friend.0.id}}')">Send a Message</a>
+				<a href="{% url 'chat:private_chat' receiver_id=friend.0.pk %}">Send a Message</a>
 				{% endif %}
 				
 			</div>

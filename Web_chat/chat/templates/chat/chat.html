@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+
+{% block content %}
+	<link rel="stylesheet" type="text/css" href="{% static 'css/chat.css' %}">
+ 	<div id="chat-container">
+ 		<div id="search-container">
+ 			<input type="text" name="Search" placeholder="Search" />
+ 		</div>
+ 		<div id="conversation-list">
+
+ 			{% for chat in chat_list %}
+			 	<a href="{% url 'chat:room' chat_id=chat.0.id %}">
+ 				
+ 				{% if chat.0.id == chat_id %}
+	 				<div class="conversation active">
+	 			{% else %}
+	 				<div class="conversation">
+	 			{% endif %}
+
+	 					{% if chat.1 != False %}
+			 				<img src="{{chat.1.profile_image.url}}" alt="profile_pic" />
+			 			{% else %}
+			 				<img src="{% static 'images/profiles/prof_1.jpg' %}" alt="profile_pic" />
+			 			{% endif %}
+			 				<div class="title-text">
+			 					{% if chat.1 != False %}
+			 						{{chat.1.username}}
+			 					{% else %}
+			 						{{chat.0.id}}		
+			 					{% endif %}
+			 				</div>
+			 				<div class="created-date">
+			 					Apr 16
+			 				</div>
+			 				<div class="conversation-message">
+			 					This is a message Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+			 				</div>
+	 				</div>
+			 	</a>
+
+ 			{% endfor %}
+ 			<!-- <div class="conversation active">
+ 				<img src="{% static 'images/profiles/prof_1.jpg' %}" alt="profile_pic" />
+ 				<div class="title-text">
+ 					Daryl Duckmanton Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+ 				</div>
+ 				<div class="created-date">
+ 					Apr 16
+ 				</div>
+ 				<div class="conversation-message">
+ 					This is a message Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+ 				</div>
+ 			</div>
+ 			 -->
+ 		</div>
+ 		<div id="new-message-container">
+ 			<a href="#">+</a>
+ 		</div>
+ 		<div id="chat-title">
+ 			{% if receiver != None %}
+ 				<span id="user-prof" onclick="account_view({{receiver.pk}})">{{receiver.username}}</span>
+ 			{% else %}
+				<span id="user-prof">{{chat_id}}</span>
+ 			{% endif %}
+ 			<img src="{% static 'images/icons/trash-logo.svg' %}" alt="Delete"/>
+ 		</div>
+ 		<div id="chat-message-list">
+ 			<div class="message-content" id="message-content">
+
+ 				<!-- <div class="message-row you-message">
+ 					<div class="message-content">
+		 				<div class="message-text">Ok then</div>
+		 				<div class="message-time">Apr 16</div>
+		 				<div class="timestamp d-none">16 Apr</div>
+		 			</div>
+	 			</div>
+	 			<div class="message-row other-message">
+	 				<div class="message-content">
+	 					<img src="{% static 'images/profiles/prof_1.jpg' %}"/>
+		 				<div class="message-text">Here we test the long text is wraped or not so I enter this much of text here so take it easy</div>
+		 				<div class="message-time">Apr 16</div>
+		 				<div class="timestamp d-none">16 Apr</div>
+	 				</div>
+	 			</div> -->
+	 			
+ 			</div>
+ 			
+ 		</div>
+ 		<div id="chat-form">
+ 			<img src="{% static 'images/icons/attachment-logo.svg' %}" alt="Add Attachment"/>
+ 			<input type="text" id="input-text" name="" placeholder="type a message"/>
+
+ 		</div>
+ 	</div>
+
+<!-- </body> -->
+
+<script type="text/javascript">
+
+	const roomName = '{{room_name}}'
+	const username = '{{request.user.username}}'
+	// let author = "Undefine"
+	
+	const path = 'ws://'+window.location.host+'/ws/chat/'+roomName+'/'
+	const chatSocket = new WebSocket(path)
+
+	chatSocket.onmessage = function(e){
+		const data = JSON.parse(e.data);
+		console.log(data)
+		if(data['command'] == 'fetch_messages'){
+			for(let i=data['messages'].length-1;i>=0;i--){
+				createMessage(data['messages'][i])
+			}
+		}else if(data['command'] == 'new_message'){
+
+			createMessage(data['message']);
+		}else if(data['command'] == 'connect_message'){
+
+			console.log(data['author'])
+			// author goes online
+			// createMessage(data['message'])
+		}
+
+		
+	}
+
+	chatSocket.onopen = function(){
+		chatSocket.send(JSON.stringify({
+			"command" : "fetch_messages",
+			"chat_id" : {{chat_id}}
+		}));
+	}
+
+	function timeConverter(timestamp){
+		var currentDate = new Date();
+		var messageTime = new Date(timestamp);
+		var seconds_ago = (currentDate-messageTime)/1000;
+		if(seconds_ago < 60){
+			return "now";
+		}else if(seconds_ago >= 60 & seconds_ago < 60*60){
+			return Math.round(seconds_ago/60) + " min ago";
+		}else if(seconds_ago >= 60*60 & seconds_ago < 3*60*60){
+			return Math.round(seconds_ago/(60*60)) + " hour ago";
+		}else if(seconds_ago >= 3*60*60 & seconds_ago < 24*60*60){
+			if(messageTime.getHours() > currentDate.getHours()){
+				return "Tommorow : "+messageTime.getHours()+":"+messageTime.getMinutes();
+			}
+			return "Today : "+messageTime.getHours()+":"+messageTime.getMinutes();
+		}else if(seconds_ago >= 24*60*60 & seconds_ago < 3*24*60*60){
+			return Math.round(seconds_ago/(24*60*60)) + " days ago";
+		}else{
+			return messageTime.getDate()+"/"+(messageTime.getMonth()+1)+"/"+messageTime.getFullYear()+" "+messageTime.getHours()+":"+messageTime.getMinutes();
+		}
+
+	}
+
+	function createMessage(message){
+		
+		let author = message['author'];
+
+		console.log(message);
+		console.log(author);
+
+		var div_message_row = document.createElement('div');
+		var div_message_content = document.createElement('div');
+		var div_message_text = document.createElement('div');
+		var div_message_time = document.createElement('div');
+		var timestamp_container = document.createElement('div');
+
+		var imgTag = document.createElement('img');
+
+
+		div_message_row.appendChild(div_message_content);
+		if(username !== author){
+			imgTag.src = message['profile_url']
+			div_message_content.appendChild(imgTag);
+			div_message_row.className += "other-message ";
+		}else{
+			div_message_row.className += "you-message ";
+		}
+		div_message_content.appendChild(div_message_text);
+		div_message_content.appendChild(div_message_time);
+		div_message_content.appendChild(timestamp_container);
+
+		timestamp_container.className += "timestamp ";
+		timestamp_container.className += "d-none ";
+		div_message_row.className += "message-row ";
+
+		div_message_text.className = "message-text";
+		div_message_time.className = "message-time";
+		div_message_content.className += "message-content ";
+		
+		div_message_text.textContent = message['content'];
+		timestamp_container.textContent = message['timestamp'];
+		if(username === author){
+			div_message_time.textContent = timeConverter(message['timestamp']);
+		}else{
+			div_message_time.textContent = author+"  |  "+timeConverter(message['timestamp']);
+		}
+		
+
+		document.getElementById('message-content').appendChild(div_message_row);
+
+
+		// document.getElementById('text-area').innerHTML += author+' : '+message + '<br>';
+	}
+	document.getElementById('input-text').onkeyup = function(e){
+		if(e.keyCode === 13){
+			send();
+		}
+	}
+
+	function send(){
+		var inputDom = document.getElementById('input-text');
+		var message = inputDom.value;
+		
+		chatSocket.send(JSON.stringify({
+			"command" : "new_message",
+			"message" : message,
+			"author" : username,
+			"chat_id" : {{chat_id}}
+		}));
+
+		inputDom.value = '';
+
+	}
+
+	function account_view(id){
+		window.location.pathname = "{% url 'account:view' user_id=526482865264864 %}".replace(526482865264864,id)
+	}
+
+	var x = setInterval(function(){
+
+		var items = document.getElementsByClassName("message-time");
+		var timestamp_items = document.getElementsByClassName("timestamp");
+		for (var i=0; i < items.length; i++) {
+			items[i].innerHTML = timeConverter(timestamp_items[i].innerHTML);
+		}
+		
+	},60000)
+
+</script>
+<style type="text/css">
+	a{
+		text-decoration: none;
+	}
+</style>
+{% endblock content %}
