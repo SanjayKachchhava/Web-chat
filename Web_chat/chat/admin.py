@@ -4,8 +4,8 @@ from django.contrib import admin
 from chat.models import Chat,Message
 
 class ChatAdmin(admin.ModelAdmin):
-	
-	search_fields = ['participants','messages']
+	# list_display = ['name']
+	search_fields = ['participants','messages','name']
 	readonly_fields = ['is_group']
 
 	class Meta:

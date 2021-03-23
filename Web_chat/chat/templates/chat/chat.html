@@ -6,13 +6,74 @@
 
 {% block content %}
 	<link rel="stylesheet" type="text/css" href="{% static 'css/chat.css' %}">
+		<div class="parent-main-container" id="parent-main-container">
+	 	<div class="main-container" id="main-container">
+			<div class="selected-item-container">
+			{% for friend in friends %}
+				<div class="selected">
+					<img src="{{friend.profile_image.url}}"/>
+					<div class="dot"  onclick="deselect({{ forloop.counter }})">&times;</div>
+					<div style="color:white;">{{friend.username}}</div>
+				</div>
+			{% endfor %}
+				<!-- <div class="selected">
+					<img src="./profile_image_2.png"/>
+					<div class="dot" onclick="deselect(2)">&times;</div>
+				</div>
+				<div class="selected">
+					<img src="./profile_image_3.png"/>
+					<div class="dot" onclick="deselect(3)">&times;</div>
+				</div>
+				<div class="selected">
+					<img src="./profile_image_1.png"/>
+					<div class="dot" onclick="deselect(4)">&times;</div>
+				</div>
+				<div class="selected">
+					<img src="./profile_image_3.png"/>
+					<div class="dot" onclick="deselect(5)">&times;</div>
+				</div>
+				<div class="selected">
+					<img src="./profile_image_1.png"/>
+					<div class="dot" onclick="deselect(6)">&times;</div>
+				</div> -->
+			</div>
+			<form onsubmit="return create_group()">
+				<div class="list-item-container">
+					<ul>
+					  <!-- <li>Adele</li> -->
+					  	<li>
+					  		<div class="select-title">
+					  			<div class="arrow" onclick="undo()">&larr;</div>
+					  			<div>Select participants</div>
+					  			<div class="create-btn" onclick=""><button for="group_name" type="submit"><i class="material-icons" style="color:white" onclick="">send</i></button></div>
+					  		</div>
+						</li>
+						 <li>
+						  	<div class="group_name_input" onclick="">
+						  		<div><input id="group_name" type="text" name="group_name" required placeholder="Group Name..." /></div>
+						  	</div>
+						 </li>
+						{% for friend in friends %}
+						  	<li>
+						  		<div class="close" onclick="select({{ forloop.counter }})">
+						  			<img src="{{friend.profile_image.url}}"/>
+						  			<div class="user-name" >{{friend.username}}</div>
+						  		</div>
+							</li>
+						{% endfor %}
+
+					</ul>
+				</div>
+			</form>
+		</div>
+	</div>
  	<div id="chat-container">
  		<div id="search-container">
  			<input type="text" name="Search" placeholder="Search" />
  		</div>
  		<div id="conversation-list">
 
- 			{% for chat in chat_list %}
+ 			{% for chat in chat_list%}
 			 	<a href="{% url 'chat:room' chat_id=chat.0.id %}">
  				
  				{% if chat.0.id == chat_id %}
@@ -24,13 +85,13 @@
 	 					{% if chat.1 != False %}
 			 				<img src="{{chat.1.profile_image.url}}" alt="profile_pic" />
 			 			{% else %}
-			 				<img src="{% static 'images/profiles/prof_1.jpg' %}" alt="profile_pic" />
+			 				<img src="{% static 'images/profiles/prof_1.png' %}" alt="profile_pic" />
 			 			{% endif %}
 			 				<div class="title-text">
 			 					{% if chat.1 != False %}
 			 						{{chat.1.username}}
 			 					{% else %}
-			 						{{chat.0.id}}		
+			 						{{chat.0.name}}		
 			 					{% endif %}
 			 				</div>
 			 				<div class="created-date">
@@ -43,28 +104,16 @@
 			 	</a>
 
  			{% endfor %}
- 			<!-- <div class="conversation active">
- 				<img src="{% static 'images/profiles/prof_1.jpg' %}" alt="profile_pic" />
- 				<div class="title-text">
- 					Daryl Duckmanton Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
- 				</div>
- 				<div class="created-date">
- 					Apr 16
- 				</div>
- 				<div class="conversation-message">
- 					This is a message Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
- 				</div>
- 			</div>
- 			 -->
+ 			
  		</div>
  		<div id="new-message-container">
- 			<a href="#">+</a>
+ 			<a href="#" onclick='chat_popup()'>+</a>
  		</div>
  		<div id="chat-title">
  			{% if receiver != None %}
  				<span id="user-prof" onclick="account_view({{receiver.pk}})">{{receiver.username}}</span>
  			{% else %}
-				<span id="user-prof">{{chat_id}}</span>
+				<span id="user-prof" onclick="group_view({{chat_id}})">{{group_name}}</span>
  			{% endif %}
  			<img src="{% static 'images/icons/trash-logo.svg' %}" alt="Delete"/>
  		</div>
@@ -80,7 +129,7 @@
 	 			</div>
 	 			<div class="message-row other-message">
 	 				<div class="message-content">
-	 					<img src="{% static 'images/profiles/prof_1.jpg' %}"/>
+	 					<img src="{% static 'images/profiles/prof_1.png' %}"/>
 		 				<div class="message-text">Here we test the long text is wraped or not so I enter this much of text here so take it easy</div>
 		 				<div class="message-time">Apr 16</div>
 		 				<div class="timestamp d-none">16 Apr</div>
@@ -110,7 +159,7 @@
 
 	chatSocket.onmessage = function(e){
 		const data = JSON.parse(e.data);
-		console.log(data)
+		// console.log(data)
 		if(data['command'] == 'fetch_messages'){
 			for(let i=data['messages'].length-1;i>=0;i--){
 				createMessage(data['messages'][i])
@@ -123,6 +172,8 @@
 			console.log(data['author'])
 			// author goes online
 			// createMessage(data['message'])
+		}else if(data['command'] == 'message_deleted'){
+			console.log(data['timestamp'])
 		}
 
 		
@@ -162,8 +213,8 @@
 		
 		let author = message['author'];
 
-		console.log(message);
-		console.log(author);
+		// console.log(message);
+		// console.log(author);
 
 		var div_message_row = document.createElement('div');
 		var div_message_content = document.createElement('div');
@@ -229,8 +280,13 @@
 
 	}
 
+
 	function account_view(id){
 		window.location.pathname = "{% url 'account:view' user_id=526482865264864 %}".replace(526482865264864,id)
+	}
+
+	function group_view(id){
+		window.location.pathname = "{% url 'chat:group_view' chat_id=526482865264864 %}".replace(526482865264864,id)
 	}
 
 	var x = setInterval(function(){
@@ -243,10 +299,256 @@
 		
 	},60000)
 
+
+
 </script>
 <style type="text/css">
 	a{
 		text-decoration: none;
 	}
 </style>
+
+
+<!-- group style -->
+<style>
+* {
+  box-sizing: border-box;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.main-container ul li {
+  border-bottom: 1px solid #002c08;
+  border-top: 1px solid #002c08;
+  margin-top: -1px; /* Prevent double borders */
+  background-color: #0048aa;
+  /*padding: 6px;*/
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  display: block;
+  position: relative;
+}
+
+.parent-main-container{
+
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	display: none;
+	background: #67606040;
+}
+
+/*.main-container ul li div{
+
+}*/
+ul li:hover {
+  background-color: #002c88;
+}
+
+.close ,.group_name_input{
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  padding: 6px 8px;
+  }
+
+  .select-title{
+  position: relative;
+  width: 100%;
+  background: #002c88;
+  display: flex;
+  flex-direction: row;
+  padding: 6px 8px;
+  justify-content: space-between;
+  }
+
+  .create-btn{
+  	cursor: pointer;
+  }
+
+  .arrow{
+  	margin-left: 5px;
+    font-size: 18px;
+    font-weight: bolder;
+    width: 27px;
+    cursor: pointer;
+  }
+
+  .selected{
+  	/*width: 40px;*/
+  	/*height: 60px;*/
+  	position: relative;
+  	/*border-radius: 100%;*/
+  	background: transparent;
+  	flex-direction: column;
+    /*place-content: center;*/
+    place-items: center;
+  	margin: 8px 10px;
+  	display: none;
+  }
+  .dot{
+  	text-align: center;
+  	width: 20px;
+  	height: 20px;
+  	position: absolute;
+  	top: -2px;
+  	transform: translateX(20px);
+
+  	border-radius: 100%;
+  	background: #ddd;
+  	cursor: pointer;
+  }
+
+  .selected-item-container{
+  	display: flex;
+  	flex-direction: row;
+  }
+
+  .selected > img , .close > img{
+  	width: 40px;
+	height: 40px;
+	border-radius: 100%;
+  }
+
+  .close > div {
+    padding: 7px 20px;
+  }
+
+  .main-container{
+  	
+  	background: #0048aa;
+    overflow-y: scroll;
+    position: absolute;
+    z-index: 20;
+    width: 275px;
+    /*display: none;*/
+    height: 72vh;
+    top: 11vh;
+  }
+
+  .list-item-container{
+  		/*overflow-y: scroll;
+  		overflow-x: hidden; 
+  		height: 60vh;*/
+  }
+
+  .selected-item-container{
+  		overflow-x: scroll;
+  		overflow-y: hidden;
+  }
+
+  button{
+  	background: transparent;
+	border: none;
+  }
+
+  input{
+  	    padding: 0px 12px;
+  }
+
+/*::-webkit-scrollbar{
+	display: none;
+}*/
+/* width */
+
+
+/*.close:hover {background: #bbb;}*/
+</style>
+
+<!-- group script -->
+<script>
+	var closebtns = document.getElementsByClassName("close");
+	var selectbtns = document.getElementsByClassName("dot");
+	var username_divs = document.getElementsByClassName("user-name");
+	var i;
+
+	// for (i = 0; i < closebtns.length; i++) {
+	//   	closebtns[i].addEventListener("click", function() {
+	//     this.parentElement.style.display = 'none';
+	//   });
+	// }
+
+	function select(n){
+		// console.log(n)
+		closebtns[n-1].parentElement.style.display = 'none';
+		selectbtns[n-1].parentElement.style.display = 'flex';
+	}
+
+	function deselect(n){
+		closebtns[n-1].parentElement.style.display = 'block';
+		selectbtns[n-1].parentElement.style.display = 'none';
+	}
+	
+	function chat_popup(){
+		document.getElementById('parent-main-container').style.display = 'block';
+	}
+	function undo(){
+		for(i=0;i<closebtns.length;i++){
+			deselect(i+1);
+		}
+		document.getElementById('parent-main-container').style.display = 'none';
+	}
+
+	function create_group(){
+		group_name_dom = document.getElementById('group_name');
+		// console.log(group_name_dom.value);
+		if(group_name_dom.value != ""){
+		
+		var username_arr = new Array();
+		for(i=0;i<selectbtns.length;i++){
+			if(selectbtns[i].parentElement.style.display == 'flex'){
+				// console.log(i+1);
+				// console.log(username_divs[i].innerHTML);
+				username_arr.push(username_divs[i].innerHTML);
+
+			}
+		}
+
+		// console.log(username_arr.toString())
+		var requestData = {
+			"csrfmiddlewaretoken":"{{csrf_token}}",
+			"usernames[]" : username_arr,
+			"group_name" : group_name_dom.value,
+		}
+		// console.log(requestData)
+		displayLoadingSpinner(true)
+		$.ajax({
+				type:"POST",
+				dataType: "json",
+				url: "{% url 'chat:create_group' %}",
+				data: requestData,
+				timeout: 10000,
+				success: function(data){
+					if(data.result == "success"){
+						var chat_id = data.chat_id;
+						window.location.pathname = "{% url 'chat:room' chat_id=526482865264864 %}".replace(526482865264864,chat_id)
+					}
+					else if(data.result == "error"){
+						alert(data.exception)
+					}
+				},
+				error: function(data){
+					console.error("Erro....",data)
+				},
+				complete: function(data){
+					displayLoadingSpinner(false)
+				}
+		})
+
+	}
+
+	group_name_dom.value = '';
+
+	return false;
+
+	}
+
+</script>
 {% endblock content %}

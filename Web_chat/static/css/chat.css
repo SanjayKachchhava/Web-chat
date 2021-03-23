@@ -280,6 +280,7 @@ body{
 	font-size: 0.875rem;
 }
 
-::-webkit-scrollbar{
+
+/*::-webkit-scrollbar{
 	display: none;
-}
+}*/

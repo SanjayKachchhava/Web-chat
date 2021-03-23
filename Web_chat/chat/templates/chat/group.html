@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+	
+
+
+<style type="text/css">
+	.image-container{
+		max-width: 250px;
+		height: auto;
+	}
+	
+	.icon-container:hover {
+		opacity: 0.3;
+		cursor: pointer;
+	}
+		
+	.card{
+		border-radius: 12px;
+	}
+	.material-icons{
+		font-size: 30px;
+	}
+	.material-icons:hover{
+		cursor: pointer;
+	}
+	
+</style>
+
+<div class="container-fluid">
+	<div class="d-flex flex-row justify-content-center flex-wrap align-items-start">
+
+		<div class="card profile-card m-2">
+		  <div class="card-body">
+		  	<div class="d-flex flex-column justify-content-center p-4">
+		  		<div class="image-container mx-auto mb-4">
+		  			<img class="d-block border border-dark rounded-circle img-fluid mx-auto profile-image" alt="logo" id="id_profile_image" src="{% static 'images/profiles/prof_1.png' %}">
+		  		</div>
+		  		
+		  		<!-- <p class="mt-4 mb-1 field-heading">Admin</p>
+		  		<h5>admin</h5> -->
+		  		<p class="mt-4 mb-1 field-heading">Group Name</p>
+		  		<h5><a href="{% url 'chat:room' chat_id=chat.id %}">{{chat.name}}</a></h5>
+
+		  		<!-- If Auth user is viewing their own profile -->
+		  		<!-- {% if request.user in admins %}
+		  			<a  class="mt-4 btn btn-primary" href="#">Update</a>
+				{% endif %} -->
+		  	</div>
+		  </div>
+		</div>
+
+		{% if request.user.is_authenticated %}
+		<div class="d-flex flex-column mb-4">
+
+			
+			<div class="card m-2 p-4">
+				<div class="d-flex flex-row align-items-center participant-container">
+					<ul>
+						<li>
+					  		<div class="select-title">
+					  			<!-- <div class="arrow" onclick="">&larr;</div> -->
+					  			<div>Participants</div>
+					  			<!-- <div class="create-btn" onclick=""><i class="material-icons" style="color:white" onclick="">send</i></div> -->
+					  		</div>
+						</li>
+						{% for participant in participants %}
+						<li>
+					  		<div class="participant" onclick="">
+					  			<img src="{{participant.profile_image.url}}"/>
+					  			{% if request.user == participant %}
+					  				<div>
+					  					<a href="{% url 'account:view' user_id=participant.id %}" class="user-name">You</a>
+					  				</div>
+					  			{% else %}
+						  			<div>
+						  				<a href="{% url 'account:view' user_id=participant.id %}" class="user-name">{{participant.username}}</a>
+						  			</div>
+					  			{% endif %}
+					  		</div>
+						</li>
+						{% endfor %}
+
+						<li>
+					  		<div class="select-title">
+					  			<!-- <div class="arrow" onclick="">&larr;</div> -->
+					  			<div>Admins</div>
+					  			<!-- <div class="create-btn" onclick=""><i class="material-icons" style="color:white" onclick="">send</i></div> -->
+					  		</div>
+						</li>
+						{% for admin in admins %}
+						<li>
+					  		<div class="participant" onclick="">
+					  			<img src="{{admin.profile_image.url}}"/>
+					  			{% if request.user == admin %}
+					  				<div>
+					  					<a href="{% url 'account:view' user_id=admin.id %}" class="user-name">You</a>
+					  				</div>
+					  			{% else %}
+						  			<div>
+						  				<a href="{% url 'account:view' user_id=admin.id %}" class="user-name">{{admin.username}}</a>
+						  			</div>
+					  			{% endif %}
+					  		</div>
+						</li>
+					
+
+						{% endfor %}
+					
+
+					</ul>
+				</div>
+
+				
+
+			</div>
+		
+		</div>
+		{% endif %}
+
+		
+	</div>
+</div>
+<style type="text/css">
+	.material-icons {
+		   color: blue;
+	}
+	.participant{
+
+	}
+
+
+
+
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.participant-container ul li {
+  border-bottom: 1px solid #002c08;
+  border-top: 1px solid #002c08;
+  margin-top: -1px; /* Prevent double borders */
+  background-color: #0048aa;
+  /*padding: 6px;*/
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  display: block;
+  position: relative;
+}
+
+.participant-container ul li a{
+	color: white;
+}
+
+
+.participant-container ul li:hover {
+  background-color: #002c88;
+}
+
+.participant-container {
+	max-height: 73vh;
+  	overflow-y: scroll;
+}
+
+.participant {
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  min-width: 200px;
+  display: flex;
+  flex-direction: row;
+  padding: 6px 8px;
+  
+  }
+
+  .select-title{
+  position: relative;
+  width: 100%;
+  background: #002c88;
+  display: flex;
+  flex-direction: row;
+  padding: 10px 8px;
+  justify-content: space-between;
+  }
+
+  .create-btn{
+  	cursor: pointer;
+  }
+
+  .arrow{
+  	margin-left: 5px;
+    font-size: 18px;
+    font-weight: bolder;
+    width: 27px;
+    cursor: pointer;
+  }
+
+  
+
+ 
+  .participant > img{
+  	width: 40px;
+	height: 40px;
+	border-radius: 100%;
+  }
+
+  .participant > div {
+    padding: 7px 20px;
+  }
+
+
+</style>
+
+
+<script type="text/javascript">
+	
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<!-- <div>
+		
+		<div class="container">
+			<div class="row">
+				<div class="col-7">
+					<div class="col-12 image-container">
+						
+					</div>
+					<div class="col-12">
+						
+					</div>
+					{{chat_id}}
+				</div>
+				<div class="col-1">
+					{{chat_id}}
+				</div>
+				<div class="col-4">
+					{{chat_id}}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<style type="text/css">
+		
+		.row > div {
+			background-color: white;
+		}
+		.col-1{
+			background-color: transparent !important;
+		}
+		.row{
+			padding: 10px;
+			width: 60vw;
+			border: 1px solid blue;
+			/*background-color: white;*/
+			border-radius: 10px;
+		}
+		.container{
+			display: flex;
+		    flex-direction: row;
+		    padding: 16px 24px;
+		    
+		    border-radius: 10px;
+		    place-content: center;
+		}
+	</style> -->
+
+
+{% endblock content %}
